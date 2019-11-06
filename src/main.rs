@@ -14,7 +14,7 @@ struct UsrMessage {
 fn main() {
     
     // Hashmap for detection of duplicate messages by (slaktedato, efta, skrottnr)
-    let mut map: HashMap<&(NaiveDate, i32, i64), bool> = HashMap::new();
+    let mut duplicatemsg: HashMap<(NaiveDate, i32, i64), bool> = HashMap::new();
 
     let conn = Connection::connect("postgres://postgres:rpg@localhost:5432", TlsMode::None).unwrap();
     
@@ -50,6 +50,8 @@ fn main() {
         };
         println!("id: {0}, message: {1}, slaktedato: {2}, efta: {3}, skrottnr: {4}, duplicate: {5}", usrmessage.id, usrmessage.message, usrmessage.slaktedato, usrmessage.efta, usrmessage.skrottnr, usrmessage.duplicate);
         // hash
+        
+        duplicatemsg.insert((usrmessage.slaktedato, usrmessage.efta, usrmessage.skrottnr), true);
 
         if usrmessage.id==2 && usrmessage.duplicate==false {
             let updates = conn.execute("UPDATE usrmessage SET duplicate = true WHERE id = $1", &[&usrmessage.id]).unwrap();
