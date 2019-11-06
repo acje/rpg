@@ -51,8 +51,8 @@ fn main() {
         println!("id: {0}, message: {1}, slaktedato: {2}, efta: {3}, skrottnr: {4}, duplicate: {5}", usrmessage.id, usrmessage.message, usrmessage.slaktedato, usrmessage.efta, usrmessage.skrottnr, usrmessage.duplicate);
         // hash
 
-        if usrmessage.id==2 {
-            let updates = conn.execute("UPDATE usrmessage SET duplicate = true WHERE id = 2", &[]).unwrap();
+        if usrmessage.id==2 && usrmessage.duplicate==false {
+            let updates = conn.execute("UPDATE usrmessage SET duplicate = true WHERE id = $1", &[&usrmessage.id]).unwrap();
             println!("{} rows were updated", updates);
         };
         
