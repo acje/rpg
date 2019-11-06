@@ -1,4 +1,6 @@
-# Rust postgres test with HashMap for deduplication of messages
+# Rust Postgres
+
+## Rust postgres test with HashMap for deduplication of messages
 
 db setup
 ```
