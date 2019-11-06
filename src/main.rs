@@ -102,7 +102,7 @@ fn main() {
             conn.execute("DROP TABLE usrmessage", &[]).unwrap();
         };
     }
-    for (key, isduplicated) in &duplicatemsg {
-        println!("{} - {} - {} - {}", key.0, key.1, key.2, isduplicated);
+    for (key, _) in &duplicatemsg {
+        println!("{} - {} - {}", key.0, key.1, key.2);
     }
 }
