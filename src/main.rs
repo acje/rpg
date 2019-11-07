@@ -92,7 +92,7 @@ fn main() {
         } else {
             let updates = conn
                 .execute(
-                    "UPDATE usrmessage SET duplicate = true WHERE id = $1",
+                    "UPDATE usrmessage SET duplicate = true WHERE id = $1 AND duplicate = false",
                     &[&usrmessage.id],
                 )
                 .unwrap();
