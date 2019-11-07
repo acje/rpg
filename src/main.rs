@@ -8,16 +8,19 @@ struct UsrMessage {
     slaktedato: NaiveDate,
     efta: i32,
     skrottnr: i64,
+    posteringsside: String,
     duplicate: bool,
 }
 
 fn main() {
     // Hashmap for detection of duplicate messages by (slaktedato, efta, skrottnr)
-    let mut duplicatemsg: HashMap<(NaiveDate, i32, i64), bool> = HashMap::new();
+    let mut duplicatemsg: HashMap<(NaiveDate, i32, i64), i32> = HashMap::new();
 
     let conn =
         Connection::connect("postgres://postgres:rpg@localhost:5432", TlsMode::None).unwrap();
-
+        
+     // conn.execute("DROP TABLE usrmessage", &[]).unwrap();
+    
     conn.execute(
         "CREATE TABLE IF NOT EXISTS usrmessage (
                     id              SERIAL PRIMARY KEY,
@@ -25,6 +28,7 @@ fn main() {
                     slaktedato      DATE NOT NULL,
                     efta            INTEGER NOT NULL,
                     skrottnr        BIGINT NOT NULL,
+                    posteringsside  VARCHAR NOT NULL,
                     duplicate       BOOL DEFAULT FALSE
                   )",
         &[],
@@ -37,11 +41,12 @@ fn main() {
         slaktedato: NaiveDate::from_ymd(2015, 3, 14),
         efta: 140,
         skrottnr: 12345678,
+        posteringsside: "debet".to_string(),
         duplicate: false,
     };
 
-    conn.execute("INSERT INTO usrmessage (message, slaktedato, efta, skrottnr, duplicate) VALUES ($1, $2, $3, $4, $5)",
-                 &[&message.message, &message.slaktedato, &message.efta, &message.skrottnr , &message.duplicate]).unwrap();
+    conn.execute("INSERT INTO usrmessage (message, slaktedato, efta, skrottnr, posteringsside, duplicate) VALUES ($1, $2, $3, $4, $5, $6)",
+                 &[&message.message, &message.slaktedato, &message.efta, &message.skrottnr, &message.posteringsside, &message.duplicate]).unwrap();
 
     let message = UsrMessage {
         id: 0,
@@ -49,15 +54,16 @@ fn main() {
         slaktedato: NaiveDate::from_ymd(2016, 3, 14),
         efta: 140,
         skrottnr: 12345678,
+        posteringsside: "kredit".to_string(),
         duplicate: false,
     };
 
-    conn.execute("INSERT INTO usrmessage (message, slaktedato, efta, skrottnr, duplicate) VALUES ($1, $2, $3, $4, $5)",
-                 &[&message.message, &message.slaktedato, &message.efta, &message.skrottnr , &message.duplicate]).unwrap();
+    conn.execute("INSERT INTO usrmessage (message, slaktedato, efta, skrottnr, posteringsside, duplicate) VALUES ($1, $2, $3, $4, $5, $6)",
+                 &[&message.message, &message.slaktedato, &message.efta, &message.skrottnr, &message.posteringsside, &message.duplicate]).unwrap();
 
     for row in &conn
         .query(
-            "SELECT id, message, slaktedato, efta, skrottnr, duplicate FROM usrmessage",
+            "SELECT id, message, slaktedato, efta, skrottnr, posteringsside, duplicate FROM usrmessage",
             &[],
         )
         .unwrap()
@@ -68,19 +74,21 @@ fn main() {
             slaktedato: row.get(2),
             efta: row.get(3),
             skrottnr: row.get(4),
-            duplicate: row.get(5),
+            posteringsside: row.get(5),
+            duplicate: row.get(6),
         };
         println!(
-            "id: {0}, message: {1}, slaktedato: {2}, efta: {3}, skrottnr: {4}, duplicate: {5}",
+            "id: {0}, message: {1}, slaktedato: {2}, efta: {3}, skrottnr: {4}, posteringsside {5}, duplicate: {6}",
             usrmessage.id,
             usrmessage.message,
             usrmessage.slaktedato,
             usrmessage.efta,
             usrmessage.skrottnr,
-            usrmessage.duplicate
+            usrmessage.posteringsside,
+            usrmessage.duplicate,
         );
         // hash
-        if !duplicatemsg.contains_key(&(
+        if !duplicatemsg.contains_key(&( // convert to counting
             usrmessage.slaktedato,
             usrmessage.efta,
             usrmessage.skrottnr,
@@ -102,7 +110,7 @@ fn main() {
             conn.execute("DROP TABLE usrmessage", &[]).unwrap();
         };
     }
-    for (key, _) in &duplicatemsg {
-        println!("{} - {} - {}", key.0, key.1, key.2);
+    for (key, value) in &duplicatemsg {
+        println!("{} - {} - {} count: {}", key.0, key.1, key.2, value);
     }
 }
