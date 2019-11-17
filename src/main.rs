@@ -18,9 +18,9 @@ fn main() {
 
     let conn =
         Connection::connect("postgres://postgres:rpg@localhost:5432", TlsMode::None).unwrap();
-        
-     // conn.execute("DROP TABLE usrmessage", &[]).unwrap();
-    
+
+    // conn.execute("DROP TABLE usrmessage", &[]).unwrap();
+
     conn.execute(
         "CREATE TABLE IF NOT EXISTS usrmessage (
                     id              SERIAL PRIMARY KEY,
@@ -34,32 +34,6 @@ fn main() {
         &[],
     )
     .unwrap();
-
-    let message = UsrMessage {
-        id: 0,
-        message: "abc".to_string(),
-        slaktedato: NaiveDate::from_ymd(2015, 3, 14),
-        efta: 140,
-        skrottnr: 12345678,
-        posteringsside: "debet".to_string(),
-        duplicate: false,
-    };
-
-    conn.execute("INSERT INTO usrmessage (message, slaktedato, efta, skrottnr, posteringsside, duplicate) VALUES ($1, $2, $3, $4, $5, $6)",
-                 &[&message.message, &message.slaktedato, &message.efta, &message.skrottnr, &message.posteringsside, &message.duplicate]).unwrap();
-
-    let message = UsrMessage {
-        id: 0,
-        message: "abc".to_string(),
-        slaktedato: NaiveDate::from_ymd(2016, 3, 14),
-        efta: 140,
-        skrottnr: 12345678,
-        posteringsside: "kredit".to_string(),
-        duplicate: false,
-    };
-
-    conn.execute("INSERT INTO usrmessage (message, slaktedato, efta, skrottnr, posteringsside, duplicate) VALUES ($1, $2, $3, $4, $5, $6)",
-                 &[&message.message, &message.slaktedato, &message.efta, &message.skrottnr, &message.posteringsside, &message.duplicate]).unwrap();
 
     for row in &conn
         .query(
@@ -95,7 +69,7 @@ fn main() {
         )) {
             duplicatemsg.insert(
                 (usrmessage.slaktedato, usrmessage.efta, usrmessage.skrottnr),
-                true,
+                1,
             );
         } else {
             let updates = conn
